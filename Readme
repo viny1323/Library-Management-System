@@ -1,119 +1,184 @@
-# Library Management Database System
+# 📚 Library Management Database System
 
-## Project Overview
-
-The Library Management Database System is a MySQL-based project designed to manage books, library members, and book issuance records. The project demonstrates core database concepts such as table creation, relationships, CRUD operations, joins, subqueries, views, indexes, triggers, stored procedures, and transactions.
-
-This project was developed as a beginner-level database management system to gain practical experience with SQL and relational database design.
+## Overview
+The Library Management Database System is a MySQL-based database project developed to manage books, members, and book issue records efficiently. This project demonstrates the implementation of core SQL concepts such as CRUD operations, joins, subqueries, views, indexes, stored procedures, triggers, and transactions.
 
 ---
 
-## Features
-
-* Manage book records
-* Manage library members
-* Issue and return books
-* Maintain relationships using Primary and Foreign Keys
-* Generate reports using SQL queries
-* Use Views for simplified data access
-* Use Triggers for automatic updates
-* Use Stored Procedures for reusable operations
-* Use Transactions for maintaining data consistency
-
----
-
-## Database Schema
-
-### Books Table
-
-* book_id (Primary Key)
-* title
-* author
-* category
-* available_copies
-
-### Members Table
-
-* member_id (Primary Key)
-* name
-* email
-* join_date
-
-### Issued_Books Table
-
-* issue_id (Primary Key)
-* book_id (Foreign Key)
-* member_id (Foreign Key)
-* issue_date
-* return_date
+## Objectives
+* Manage library books and members.
+* Track issued and returned books.
+* Maintain data integrity using primary and foreign keys.
+* Generate reports using SQL queries.
+* Learn practical database design and management.
 
 ---
 
 ## Technologies Used
-
 * MySQL
 * SQL
 
 ---
 
-## SQL Concepts Implemented
+## Database Schema
 
-* CREATE DATABASE
-* CREATE TABLE
-* INSERT
-* SELECT
-* UPDATE
-* DELETE
-* WHERE Clause
-* ORDER BY
-* Aggregate Functions
-* GROUP BY
-* HAVING
-* INNER JOIN
-* LEFT JOIN
-* RIGHT JOIN
-* Subqueries
-* Views
-* Indexes
-* Stored Procedures
-* Triggers
-* Transactions
+### 1. Books
+
+| Column | Data Type | Constraints |
+| :--- | :--- | :--- |
+| `book_id` | INT | PRIMARY KEY, AUTO_INCREMENT |
+| `title` | VARCHAR(100) | NOT NULL |
+| `author` | VARCHAR(100) | NOT NULL |
+| `category` | VARCHAR(50) | NOT NULL |
+| `available_copies` | INT | DEFAULT 0 |
+
+### 2. Members
+
+| Column | Data Type | Constraints |
+| :--- | :--- | :--- |
+| `member_id` | INT | PRIMARY KEY, AUTO_INCREMENT |
+| `name` | VARCHAR(100) | NOT NULL |
+| `email` | VARCHAR(100) | UNIQUE, NOT NULL |
+| `join_date` | DATE | DEFAULT (CURRENT_DATE) |
+
+### 3. Issued_Books
+
+| Column | Data Type | Constraints |
+| :--- | :--- | :--- |
+| `issue_id` | INT | PRIMARY KEY, AUTO_INCREMENT |
+| `book_id` | INT | FOREIGN KEY references Books |
+| `member_id` | INT | FOREIGN KEY references Members |
+| `issue_date` | DATE | NOT NULL |
+| `return_date` | DATE | NULL (Populated when returned) |
 
 ---
 
-## Sample Query
+## SQL Scripts & Implementation
 
+### 1. Schema Creation (`schema.sql`)
 ```sql
-SELECT m.name, b.title
+CREATE DATABASE IF NOT EXISTS LibraryDB;
+USE LibraryDB;
+
+CREATE TABLE Books (
+    book_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    author VARCHAR(100) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    available_copies INT DEFAULT 0
+);
+
+CREATE TABLE Members (
+    member_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    join_date DATE DEFAULT (CURRENT_DATE)
+);
+
+CREATE TABLE Issued_Books (
+    issue_id INT AUTO_INCREMENT PRIMARY KEY,
+    book_id INT,
+    member_id INT,
+    issue_date DATE NOT NULL,
+    return_date DATE DEFAULT NULL,
+    FOREIGN KEY (book_id) REFERENCES Books(book_id) ON DELETE CASCADE,
+    FOREIGN KEY (member_id) REFERENCES Members(member_id) ON DELETE CASCADE
+);
+```
+
+### 2. Sample Data Population (`sample_data.sql`)
+```sql
+INSERT INTO Books (title, author, category, available_copies) VALUES
+('Database Systems', 'Ramez Elmasri', 'Computer Science', 5),
+('Python Programming', 'John Zelle', 'Computer Science', 3),
+('The Great Gatsby', 'F. Scott Fitzgerald', 'Fiction', 2);
+
+INSERT INTO Members (name, email, join_date) VALUES
+('Ankit Singh', 'ankit@email.com', '2025-01-15'),
+('Rahul Sharma', 'rahul@email.com', '2025-02-10');
+
+INSERT INTO Issued_Books (book_id, member_id, issue_date, return_date) VALUES
+(1, 1, '2025-04-01', NULL),
+(2, 2, '2025-04-03', NULL);
+```
+
+### 3. Advanced Features (Triggers & Procedures)
+#### Automation Trigger (Reduces Book Inventory on Issue)
+```sql
+DELIMITER //
+CREATE TRIGGER AfterBookIssued
+AFTER INSERT ON Issued_Books
+FOR EACH ROW
+BEGIN
+    UPDATE Books 
+    SET available_copies = available_copies - 1 
+    WHERE book_id = NEW.book_id;
+END //
+DELIMITER ;
+```
+
+---
+
+## Core SQL Concepts Implemented
+* **DDL & DML:** `CREATE DATABASE`, `CREATE TABLE`, `INSERT`, `UPDATE`, `DELETE`
+* **Data Retrieval:** `SELECT`, `WHERE`, `ORDER BY`, `GROUP BY`, `HAVING`
+* **Relational Joins:** `INNER JOIN`, `LEFT JOIN`, `RIGHT JOIN`
+* **Database Objects:** Subqueries, Views, Indexes, Stored Procedures, Triggers, and Transactions
+
+---
+
+## Sample Analytical Queries
+
+### 1. View Active Book Issues (With Joins)
+```sql
+SELECT m.name, b.title, i.issue_date
 FROM Members m
-JOIN Issued_Books i
-ON m.member_id = i.member_id
-JOIN Books b
-ON i.book_id = b.book_id;
+JOIN Issued_Books i ON m.member_id = i.member_id
+JOIN Books b ON b.book_id = i.book_id
+WHERE i.return_date IS NULL;
+```
+#### Output
+
+| Name | Book Title | Issue Date |
+| :--- | :--- | :--- |
+| Ankit Singh | Database Systems | 2025-04-01 |
+| Rahul Sharma | Python Programming | 2025-04-03 |
+
+### 2. Identify Most Popular Categories
+```sql
+SELECT category, COUNT(*) as Total_Issues
+FROM Books b
+JOIN Issued_Books i ON b.book_id = i.book_id
+GROUP BY category;
+```
+
+---
+
+## Project Structure
+```text
+Library-Management-System-MySQL/
+│
+├── README.md               # Project documentation and summary
+├── library_management.sql  # Master script combining schema and data
+├── schema.sql              # Database architecture and tables setup
+├── sample_data.sql         # Seed mock data for verification
+└── screenshots/            # UI / Terminal execution outputs
+    ├── tables.png
+    ├── join_query.png
+    └── reports.png
 ```
 
 ---
 
 ## Learning Outcomes
-
-Through this project, I learned:
-
-* Relational Database Design
-* Data Integrity using Constraints
-* Writing Complex SQL Queries
-* Implementing Database Automation with Triggers
-* Creating Reusable Procedures
-* Managing Transactions
-* Database Normalization Concepts
+Through this project, I gained hands-on experience with:
+* **Relational Database Design:** Building dynamic entity relationships with proper constraints.
+* **SQL Query Optimization:** Writing clean joins and indexing heavily searched columns.
+* **Database Automation:** Implementing triggers to eliminate manual record updates.
 
 ---
 
-## Future Improvements
-
-* Add Fine Management System
-* Add Book Reservation Feature
-* Develop a Frontend Interface using PHP or Python
-* Generate Detailed Library Reports
-* Integrate Authentication and User Roles
-
-
+## Future Enhancements
+* **Fine Calculation System:** Track overdue durations and assign monetary penalties.
+* **Book Reservation Feature:** Reserve borrowed items for future user pickup.
+* **Application Interface:** Connect this backend architecture to a Python (Tkinter/Flask) frontend.
