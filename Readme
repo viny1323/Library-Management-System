@@ -1,0 +1,119 @@
+# Library Management Database System
+
+## Project Overview
+
+The Library Management Database System is a MySQL-based project designed to manage books, library members, and book issuance records. The project demonstrates core database concepts such as table creation, relationships, CRUD operations, joins, subqueries, views, indexes, triggers, stored procedures, and transactions.
+
+This project was developed as a beginner-level database management system to gain practical experience with SQL and relational database design.
+
+---
+
+## Features
+
+* Manage book records
+* Manage library members
+* Issue and return books
+* Maintain relationships using Primary and Foreign Keys
+* Generate reports using SQL queries
+* Use Views for simplified data access
+* Use Triggers for automatic updates
+* Use Stored Procedures for reusable operations
+* Use Transactions for maintaining data consistency
+
+---
+
+## Database Schema
+
+### Books Table
+
+* book_id (Primary Key)
+* title
+* author
+* category
+* available_copies
+
+### Members Table
+
+* member_id (Primary Key)
+* name
+* email
+* join_date
+
+### Issued_Books Table
+
+* issue_id (Primary Key)
+* book_id (Foreign Key)
+* member_id (Foreign Key)
+* issue_date
+* return_date
+
+---
+
+## Technologies Used
+
+* MySQL
+* SQL
+
+---
+
+## SQL Concepts Implemented
+
+* CREATE DATABASE
+* CREATE TABLE
+* INSERT
+* SELECT
+* UPDATE
+* DELETE
+* WHERE Clause
+* ORDER BY
+* Aggregate Functions
+* GROUP BY
+* HAVING
+* INNER JOIN
+* LEFT JOIN
+* RIGHT JOIN
+* Subqueries
+* Views
+* Indexes
+* Stored Procedures
+* Triggers
+* Transactions
+
+---
+
+## Sample Query
+
+```sql
+SELECT m.name, b.title
+FROM Members m
+JOIN Issued_Books i
+ON m.member_id = i.member_id
+JOIN Books b
+ON i.book_id = b.book_id;
+```
+
+---
+
+## Learning Outcomes
+
+Through this project, I learned:
+
+* Relational Database Design
+* Data Integrity using Constraints
+* Writing Complex SQL Queries
+* Implementing Database Automation with Triggers
+* Creating Reusable Procedures
+* Managing Transactions
+* Database Normalization Concepts
+
+---
+
+## Future Improvements
+
+* Add Fine Management System
+* Add Book Reservation Feature
+* Develop a Frontend Interface using PHP or Python
+* Generate Detailed Library Reports
+* Integrate Authentication and User Roles
+
+
